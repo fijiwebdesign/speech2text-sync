@@ -1,0 +1,61 @@
+<p>The purpose of this project, is not only to demonstrate the use of Chart JS, but also to provide convenience
+  functions to plot charts to explain algorithms in my other machine learning projects</p>
+<h3>Scatter Plot</h3>
+<canvas id="scatter"></canvas>
+<h3>Scatter Plot With Regression Line <sup>passing function</sup></h3>
+<canvas id="regression1"></canvas>
+<h3>Scatter Plot With Regression Line <sup>passing array</sup></h3>
+<canvas id="regression2"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script src="js/regression-line.js"></script>
+
+<script>
+  window.onload = () => {
+    var predictFunc1 = (x) => { return Math.pow(x, 2) + 80; }
+    var sampleData1 = getRandomizedData(predictFunc1, 100, 2, [[0, 10]], 100).map((d, i) => (
+      { x: d[0], y: d[1], title: `Data 1-${i}`, afterTitle: 'Sample Data 1' })
+    )
+    var predictData1 = sampleData1.map(d => Object.assign({}, d, { y: predictFunc1(d.x) }))
+
+    var predictFunc2 = (x) => { return -0.25 * Math.pow(x, 3) + 250; }
+    var sampleData2 = getRandomizedData(predictFunc2, 100, 2, [[0, 10]], 100).map((d, i) => (
+      { x: d[0], y: d[1], title: `Index ${i}` })
+    )
+    var predictData2 = sampleData1.map(d => Object.assign({}, d, { y: predictFunc2(d.x) }))
+    populate2DScatter("scatter", [
+      { name: 'Sample Data 1', data: sampleData1, color: 'yellow' },
+      { name: 'Sample Data 2', data: sampleData2, color: 'green' }
+    ], 'X axis', 'Y axis')
+    populate2DRegression("regression1",
+      [{ name: 'Sample Data', data: sampleData1 }],
+      { name: 'Prediction', func: predictFunc1 },
+      'X axis', 'Y axis')
+    populate2DRegression("regression2",
+      [{ name: 'Sample Data 2', data: sampleData2, color: 'purple' }],
+      { name: 'Prediction', data: predictData2, color: 'orange' },
+      'X axis', 'Y axis')
+  }
+</script>
+
+<style>
+  [ng\:cloak],
+  [ng-cloak],
+  [data-ng-cloak],
+  [x-ng-cloak],
+  .ng-cloak,
+  .x-ng-cloak {
+    display: none !important;
+  }
+
+  body {
+    font-family: Arial;
+    background-color: #eee;
+    margin: 0px;
+  }
+
+  div {
+    width: 100%;
+    margin: 5px;
+  }
+</style>
