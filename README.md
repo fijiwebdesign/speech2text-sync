@@ -11,3 +11,8 @@ npm install
 npm start
 ```
 
+## Browser support
+
+`AudioContext` - https://caniuse.com/?search=AudioContext
+`WebAudio` - https://caniuse.com/?search=WebAudio
+
