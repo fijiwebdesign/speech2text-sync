@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>createMediaStreamSource example</title>
+
+    <style>
+        #canvas {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            background-color: black;
+        }
+        #controls {
+            text-align: center;
+        }
+        #start_button, #stop_button {
+            font-size: 16pt;
+        }
+        #msg {
+            text-align: center;
+        }
+    </style>
+  </head>
+
+  <body>
+        <div id="canvases"></div>
+
+        <p id="controls">
+          <input type="button" id="start_button" value="Start">
+          &nbsp; &nbsp;
+          <input type="button" id="stop_button" value="Stop">
+          <p id="msg"></p>
+        </p>
+
+        <div id="words">
+          Just about the only thing I enjoyed about school, was staring at the meal worms.
+        </div>
+        <div id="words-audio">
+        </div>
+
+        <script src="js/text-sync.js"></script>
+    </body>
+    </html>
+    

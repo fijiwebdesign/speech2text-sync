@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width">
+
+  <title>createMediaStreamSource example</title>
+
+  <style>
+    #inputForm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #inputForm > * {
+      margin-top: 10px;
+    }
+    button  {
+      min-width: 200px;
+    }
+    #inputText {
+      width: 500px;
+      height: 200px;
+    }
+    #voiceSelect {
+      min-width: 200px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form id="inputForm">
+    <textarea id="inputText">Just about the only thing I enjoyed about school, was stairing at the meal worms.</textarea>
+    <select id="voiceSelect"></select>
+    <button type="submit">Speak</button>
+  </form>
+
+  <script src="js/speech-synthesis.js"></script>
+
+</body>
+
+</html>
