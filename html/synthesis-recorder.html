@@ -207,15 +207,14 @@ if (typeof window !== 'undefined') window.SpeechSynthesisRecorder = SpeechSynthe
       }) => {
         // do stuff with `ArrayBuffer`, `AudioBuffer`, `Blob`, `MediaSource`, `MediaStream`, `ReadableStream`
         console.log(tts, data);
-          tts.audioNode.src = URL.createObjectURL(data);
-          tts.audioNode.title = tts.utterance.text;
-          tts.audioNode.onloadedmetadata = () => {
-            console.log(tts.audioNode.duration);
-            tts.audioNode.play();
-          }
+        tts.audioNode.src = URL.createObjectURL(data);
+        tts.audioNode.title = tts.utterance.text;
+        tts.audioNode.onloadedmetadata = () => {
+          console.log(tts.audioNode.duration);
+          // tts.audioNode.play();
+        }
       })
-
-    .catch(err => console.log(err))
+      .catch(err => console.log(err))
   </script>
 </body>
 

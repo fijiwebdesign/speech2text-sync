@@ -2,6 +2,7 @@
 let audioContext;
 let audioBuffer;
 let sourceNode;
+let gainNode;
 let analyserNode;
 let audioPlaying = false;
 let sampleSize = 256;  // number of samples to collect before analyzing data
@@ -10,7 +11,7 @@ let amplitudeArray;     // array to hold time domain data
 let audioUrl = "audio/quote.webm";
 // Global variables for the Graphics
 let canvasWidth  = 1000;
-let canvasHeight = 256;
+let canvasHeight = 800;
 let audio = null;
 
 // When the Start button is clicked, finish setting up the audio nodes, play the sound,
@@ -47,13 +48,17 @@ document.querySelector('#stop_button').addEventListener('click', function(e) {
 function setupAudioNodes(stream) {
     sourceNode = audioContext.createMediaStreamSource(stream);
     analyserNode   = audioContext.createAnalyser();
+    gainNode = audioContext.createGain();
     //analyserNode.fftSize = sampleSize;
     // Create the array for the data values
     amplitudeArray = new Uint8Array(analyserNode.frequencyBinCount);
     // Now connect the nodes together
     sourceNode.connect(audioContext.destination);
-    sourceNode.connect(analyserNode);
+    sourceNode.connect(gainNode);
+    gainNode.connect(analyserNode);
     analyserNode.connect(audioContext.destination);
+
+    gainNode.gain.value = 1
 }
 // Load the audio from the URL via Ajax and store it in global variable audioData
 // Note that the audio load is asynchronous
@@ -73,20 +78,24 @@ function loadSound(url) {
   });
   audio.addEventListener("ended", () => {
     window.cancelAnimationFrame(drawCanvas);
+    audioPlaying = false
+    canvasDone()
   });
+
+  audioContext.onstatechange = function() {
+    console.log(audioContext.state);
+  }
+
 }
 
 // Play the audio and loop until stopped
 function playSound(audio) {
+    //audio.playbackRate = 2
+    //audio.volume = 0
+    // @todo try gain node = 0
     audio.play();
     audioPlaying = true;
 
-    setTimeout(() => {
-      audioPlaying = false
-
-      canvasDone()
-    }, 5000)
-    
     drawCanvas();
 }
 
@@ -111,6 +120,8 @@ if (!canvas) canvas = createCanvas();
 ctx = canvas.getContext('2d');
 
 let x = 0;
+
+let values = [];
 
 function drawCanvas() {
 
@@ -141,9 +152,10 @@ function drawCanvas() {
   const time = audio.currentTime
   const avg = Math.round(totalAmp/range)
   const ts = sourceNode.context.getOutputTimestamp()
-  console.log('stats', { x, ts, totalAmp, avg, max, min, range, time })
+  //console.log('stats', { x, ts, totalAmp, avg, max, min, range, time })
 
   addLinePoint(x, max)
+  values.push(max);
   
   x++;
 }
@@ -154,13 +166,62 @@ function addLinePoint(x, y) {
     ctx.moveTo(x, y);
   } else {
     ctx.lineTo(x, y);
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
   }
 }
 
 function canvasDone() {
-  console.log('mapping lines')
   ctx.strokeStyle = '#000';
   ctx.stroke();
+
+  const peaks = smoothed_z_score(values, {
+    lag: 10,
+    threshold: 1,
+    influence: 0.5
+  })
+  console.log('peaks', peaks);
+
+  ctx.beginPath();
+  peaks.forEach((peak, i) => {
+    if (peak === 1) {
+      if (peaks[i-1] === 0) {
+        ctx.beginPath();
+      } else if (peaks[i+1] === 0) {
+        ctx.strokeStyle = 'red';
+        ctx.stroke();
+      }
+      ctx.lineTo(i, values[i] + 300);
+    }
+  })
+
+  ctx.beginPath();
+  peaks.forEach((peak, i) => {
+    if (peak === -1) {
+      if (peaks[i-1] === 0) {
+        ctx.beginPath();
+      } else if (peaks[i+1] === 0) {
+        ctx.strokeStyle = 'blue';
+        ctx.stroke();
+      }
+      ctx.lineTo(i, values[i] + 300);
+    }
+  })
+
+  ctx.beginPath();
+  peaks.forEach((peak, i) => {
+    if (peak === 0) {
+      if (peaks[i-1] !== 0) {
+        ctx.beginPath();
+      } else if (peaks[i+1] !== 0) {
+        ctx.strokeStyle = 'green';
+        ctx.stroke();
+      }
+      ctx.lineTo(i, values[i] + 300);
+    }
+  })
+
+
 }
 
 function clearCanvas() {
