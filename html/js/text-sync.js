@@ -180,6 +180,7 @@ function canvasDone() {
     threshold: 1,
     influence: 0.5
   })
+  console.log('values', values);
   console.log('peaks', peaks);
 
   ctx.beginPath();
