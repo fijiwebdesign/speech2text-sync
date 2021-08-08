@@ -297,15 +297,17 @@ let data = [
 
 function detectPeaks(data, windowWidth, threshold) {
   const peaks = [];
+  let inc = false;
   for (let i = 0; i < data.length; i++) {
     const start = Math.max(0, i - windowWidth);
     const end = Math.min(data.length, i + windowWidth);
-    let deltaAcc = 0;
-    for (let a = start; a < end; a++) {
-      deltaAcc += Math.abs(data[a - 1] - data[a]);
-    }
-    if (deltaAcc > threshold) {
-      peaks.push(i);
+    const sumLeft = data.slice(start, i).reduce((sum, y) => sum+y, 0);
+    const sumRight = data.slice(i, end).reduce((sum, y) => sum+y, 0);
+    if (sumLeft + threshold < sumRight) {
+      inc = true
+    } else {
+      if (inc === true) peaks.push(i);
+      inc = false;
     }
   }
   return peaks;
@@ -327,17 +329,61 @@ function detectVolume(data, windowWidth, threshold) {
   return peaks;
 }
 
+function detectGradientInc(data, windowWidth, threshold) {
+  const peaks = [];
+  for (let i = 0; i < data.length; i++) {
+    const start = Math.max(0, i - windowWidth);
+    const end = Math.min(data.length, i + windowWidth);
+    const sumLeft = data.slice(start, i).reduce((sum, y) => sum+y, 0);
+    const sumRight = data.slice(i, end).reduce((sum, y) => sum+y, 0);
+    if (sumLeft + threshold < sumRight) {
+      peaks.push(i);
+    }
+  }
+  return peaks;
+}
+
+function detectGradientDec(data, windowWidth, threshold) {
+  const peaks = [];
+  for (let i = 0; i < data.length; i++) {
+    const start = Math.max(0, i - windowWidth);
+    const end = Math.min(data.length, i + windowWidth);
+    const sumLeft = data.slice(start, i).reduce((sum, y) => sum+y, 0);
+    const sumRight = data.slice(i, end).reduce((sum, y) => sum+y, 0);
+    if (sumLeft > sumRight + threshold) {
+      peaks.push(i);
+    }
+  }
+  return peaks;
+}
+
+const height = 256 + 30; // canvas height
+
 let windowWidth = 10;
 let threshold = 100;
 
-let points = data.map(y => 256 - y)
+let points = data.map(y => height - y)
+
+const detections = {
+  peaks: true,
+  volume: true,
+  increases: true
+}
 
 const view = () => {
   const peaks = detectPeaks(data, windowWidth, threshold);
   const volumes = detectVolume(data, windowWidth, threshold);
-  //console.log('peaks', peaks)
+  const increases = detectGradientInc(data, windowWidth, threshold);
+  const decreases = detectGradientDec(data, windowWidth, threshold);
 
-  const height = 256
+  const overlays = {
+    peaks: peaks.map(x => m("line", { x1: x, y1: 0, x2: x, y2: height, stroke: "#FF149350" })),
+    volume: volumes.map(x => m("line", { x1: x, y1: 0, x2: x, y2: 10, stroke: "#BBFFBB" })),
+    increases: increases.map(x => m("line", { x1: x, y1: 10, x2: x, y2: 20, stroke: "#C71585" })),
+    decreases: decreases.map(x => m("line", { x1: x, y1: 20, x2: x, y2: 30, stroke: "#33FFF9" })),
+  };
+  const overlayEls = Object.values(overlays)
+
   const svg = m(
     "svg",
     {
@@ -348,8 +394,7 @@ const view = () => {
       },
     },
     [
-      volumes.map(x => m("line", { x1: x, y1: 0, x2: x, y2: height, stroke: "#33FFF9" })),
-      peaks.map(x => m("line", { x1: x, y1: 0, x2: x, y2: height, stroke: "#FE9AFF" })),
+      ...overlayEls,
       m("polyline", {
         points: points.map((y, x) => `${x},${y}`).join(" "),
         stroke: "#4233FF",
@@ -357,6 +402,25 @@ const view = () => {
       }),
     ],
   );
+
+  const checkboxes = Object.keys(detections).map(name => {
+    return m(
+      "div",
+      "",
+      m("input", {
+        type: "checkbox",
+        checked: detections[name] ? 'checked' : '',
+        value: 1,
+        onclick: e => {
+          ;(detections[name] = !detections[name]);
+
+          console.log('detection changed', detections[name], name, detections)
+        },
+      }),
+      name,
+    )
+  })
+
   return m("div", [
     svg,
     m(
@@ -383,6 +447,7 @@ const view = () => {
       }),
       windowWidth,
     ),
+    checkboxes,
   ]);
 };
 
