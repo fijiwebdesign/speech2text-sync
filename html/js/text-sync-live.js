@@ -294,6 +294,7 @@ let data = [
   162,
   158
 ];
+const sentence = 'Just about the only thing I enjoyed about school, was staring at the meal worms.';
 
 const height = 256 + 30; // canvas height
 
@@ -357,10 +358,13 @@ const view = () => {
       }),
       name,
     )
-  })
+  });
+
+  const words = m("div", { id: "words"}, sentence.split(' ').map(word => m('span', word)));
 
   return m("div", [
     svg,
+    words,
     m(
       "div",
       "threshold",
