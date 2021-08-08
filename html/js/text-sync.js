@@ -155,7 +155,7 @@ function drawCanvas() {
   //console.log('stats', { x, ts, totalAmp, avg, max, min, range, time })
 
   addLinePoint(x, max)
-  values.push(max);
+  values.push([time, max]);
   
   x++;
 }
