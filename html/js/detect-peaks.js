@@ -300,8 +300,6 @@ const height = 256 + 30; // canvas height
 let windowWidth = 10;
 let threshold = 100;
 
-let points = data.map(y => height - y)
-
 const detections = {
   peaks: true,
   volume: true,
@@ -309,6 +307,8 @@ const detections = {
 }
 
 const view = () => {
+
+  const points = data.map(y => height - y)
   const peaks = detectPeaks(data, windowWidth, threshold);
   const volumes = detectVolume(data, windowWidth, threshold);
   const increases = detectGradientInc(data, windowWidth, threshold);

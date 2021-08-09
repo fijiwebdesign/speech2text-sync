@@ -1176,12 +1176,12 @@ const height = 256 + 30; // canvas height
 let windowWidth = 5;
 let threshold = 10;
 
-let points = data.map(y => height - y)
-
 const detections = {
   peaks: true,
+  lows: true,
   volume: true,
-  increases: true
+  increases: true,
+  decreases: true
 }
 
 let timer = 0
@@ -1193,13 +1193,16 @@ let interval = setInterval(() => {
 }, 100)
 
 const view = () => {
+  const points = data.map(y => height - y);
   const peaks = detectPeaks(data, windowWidth, threshold);
+  const lows = detectLows(data, windowWidth, threshold);
   const volumes = detectVolume(data, windowWidth, threshold);
   const increases = detectGradientInc(data, windowWidth, threshold);
   const decreases = detectGradientDec(data, windowWidth, threshold);
 
   const overlays = {
     peaks: peaks.map(x => m("line", { x1: x, y1: 0, x2: x, y2: height, stroke: "#FF149350" })),
+    lows: lows.map(x => m("line", { x1: x, y1: 0, x2: x, y2: height, stroke: "#33FFF9" })),
     volume: volumes.map(x => m("line", { x1: x, y1: 0, x2: x, y2: 10, stroke: "#BBFFBB" })),
     increases: increases.map(x => m("line", { x1: x, y1: 10, x2: x, y2: 20, stroke: "#C71585" })),
     decreases: decreases.map(x => m("line", { x1: x, y1: 20, x2: x, y2: 30, stroke: "#33FFF9" })),
@@ -1244,7 +1247,10 @@ const view = () => {
   });
 
   const audioLen = 5
-  const _words = sentence.replace(/((^|\s).{1,3})\s/g, '$1_' ).split(' ')
+  const _words = sentence
+    .replace(/((^|\s).{1,3})\s/g, '$1_' )
+    .split(' ')
+    .map(word => word.replace('_', ' '))
   const words = m(
     "div", 
     { id: "words"}, 
